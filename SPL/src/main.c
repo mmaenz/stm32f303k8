@@ -1,6 +1,8 @@
 #include <stm32f30x_gpio.h>
 #include <stm32f30x_rcc.h>
 #include "protothread.h"
+#include "csptr/smart_ptr.h"
+
 #define LEDPORT (GPIOB)
 #define LEDPIN (GPIO_Pin_3)
 #define ENABLE_GPIO_CLOCK (RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE))
@@ -12,9 +14,8 @@ typedef struct {
  } thread_context_t;
 
 /* timing is not guaranteed :) */
-static pt_t simple_delay(void * const env) {
+static void simple_delay(void * const env) {
 	thread_context_t * const c = env;
-	pt_resume(c);
 	/* simple delay loop */
 	for (int i = 0; i < 1000000; i++) {
 		asm volatile ("nop");
@@ -22,10 +23,14 @@ static pt_t simple_delay(void * const env) {
 
 }
 
-
+void test(void) {
+	smart int *some_int = unique_ptr(int, 1);
+	*some_int = 200;
+}
 
 /* system entry point */
 int main(void) {
+	test();
 	protothread_t const pt = protothread_create();
 
 	thread_context_t * const blink = malloc(sizeof(*blink));
